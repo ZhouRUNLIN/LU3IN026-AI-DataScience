@@ -297,4 +297,26 @@ class ClassifierPerceptronBiais(ClassifierPerceptron):
                 self.w = self.w + desc_set[i]*self.learning_rate*(label_set[i]-self.score(desc_set[i]))
                 self.allw.append(self.w.copy())
         return None
+    
+    def train(self, desc_set, label_set, nb_max=100, seuil=0.001):
+        """ Apprentissage itératif du perceptron sur le dataset donné.
+            Arguments:
+                - desc_set: ndarray avec des descriptions
+                - label_set: ndarray avec les labels correspondants
+                - nb_max (par défaut: 100) : nombre d'itérations maximale
+                - seuil (par défaut: 0.001) : seuil de convergence
+            Retour: la fonction rend une liste
+                - liste des valeurs de norme de différences
+        """
+        export_list = []
+        while nb_max>0:
+            w1 = self.w.copy()
+            self.train_step(desc_set, label_set)
+            w2 = self.w.copy()
+            d = pow(((w1-w2) ** 2).sum(),0.5)
+            export_list.append(d)
+            if d <= seuil:
+                return export_list
+            nb_max -= 1
+        return export_list
 # ------------------------ 
