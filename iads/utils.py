@@ -110,3 +110,20 @@ def create_XOR(n, var):
     desc1,label1 = genere_dataset_gaussian(np.array([1,1]),np.array([[var,0],[0,var]]),np.array([0,0]),np.array([[var,0],[0,var]]),n)
     desc2,label2 = genere_dataset_gaussian(np.array([0,1]),np.array([[var,0],[0,var]]),np.array([1,0]),np.array([[var,0],[0,var]]),n)
     return np.concatenate((desc1,desc2),axis=0),np.asarray([-1]*len(desc1)+[1]*len(desc2))
+
+def crossval(X, Y, n_iterations, iteration, init_seed=42):
+    np.random.seed(init_seed)
+    index = np.random.permutation(len(X))
+    Xtest = np.asarray([ X[index[j]] for j in range(int(len(X)*iteration/n_iterations),int(len(X)*(iteration+1)/n_iterations))])
+    Ytest = np.asarray([ Y[index[j]] for j in range(int(len(Y)*iteration/n_iterations),int(len(Y)*(iteration+1)/n_iterations))])
+    Xapp = np.asarray([ X[index[j]] for j in range(0,int(len(X)*iteration/n_iterations))]+[ X[index[j]] for j in range(int(len(X)*(iteration+1)/n_iterations),len(X))])
+    Yapp = np.asarray([ Y[index[j]] for j in range(0,int(len(Y)*iteration/n_iterations))]+[ Y[index[j]] for j in range(int(len(Y)*(iteration+1)/n_iterations),len(Y))])
+    return Xapp, Yapp, Xtest, Ytest
+
+def crossval_strat(X, Y, n_iterations, iteration, init_seed=42):
+    X1 = np.asarray([X[i] for i in range(len(X)) if Y[i]==1])
+    X0 = np.asarray([X[i] for i in range(len(X)) if Y[i]==-1])
+    Xapp1, Yapp1, Xtest1, Ytest1 = crossval(X1,np.asarray([1]*len(X1)),n_iterations, iteration, init_seed)
+    Xapp0, Yapp0, Xtest0, Ytest0 = crossval(X0,np.asarray([-1]*len(X0)),n_iterations, iteration, init_seed)
+    Xapp, Yapp, Xtest, Ytest = np.concatenate((Xapp0,Xapp1)), np.concatenate((Yapp0,Yapp1)), np.concatenate((Xtest0,Xtest1)), np.concatenate((Ytest0,Ytest1))
+    return Xapp, Yapp, Xtest, Ytest
