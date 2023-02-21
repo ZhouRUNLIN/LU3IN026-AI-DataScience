@@ -100,6 +100,30 @@ def plot_frontiere(desc_set, label_set, classifier, step=30):
     # tracer des frontieres
     # colors[0] est la couleur des -1 et colors[1] est la couleur des +1
     plt.contourf(x1grid,x2grid,res,colors=["darksalmon","skyblue"],levels=[-1000,0,1000])
+    
+# plot_frontiere:
+def plot_frontiere_high_dimension(desc_set, label_set, classifier, nbdim, dim1, dim2, step=30):
+    """ desc_set * label_set * Classifier * int -> NoneType
+        Remarque: le 4e argument est optionnel et donne la "résolution" du tracé: plus il est important
+        et plus le tracé de la frontière sera précis.        
+        Cette fonction affiche la frontière de décision associée au classifieur
+    """
+    mmax=desc_set.max(0)
+    mmin=desc_set.min(0)
+    moys=[ desc_set[i].mean() for i in range(nbdim) ]
+    x1grid,x2grid=np.meshgrid(np.linspace(mmin[dim1],mmax[dim1],step),np.linspace(mmin[dim2],mmax[dim2],step))
+    grid=np.hstack((x1grid.reshape(x1grid.size,1),x2grid.reshape(x2grid.size,1)))
+    
+    # calcul de la prediction pour chaque point de la grille
+    grid2=[moys[:] for i in range(len(grid))]
+    for g in range(len(grid)):
+        grid2[g][dim1]=grid[g][0]
+        grid2[g][dim2]=grid[g][1]
+    res=np.array([classifier.predict(grid2[i]) for i in range(len(grid2)) ])
+    res=res.reshape(x1grid.shape)
+    # tracer des frontieres
+    # colors[0] est la couleur des -1 et colors[1] est la couleur des +1
+    plt.contourf(x1grid,x2grid,res,colors=["darksalmon","skyblue"],levels=[-1000,0,1000])
 
 def create_XOR(n, var):
     """ int * float -> tuple[ndarray, ndarray]
